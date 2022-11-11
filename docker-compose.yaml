@@ -1,4 +1,3 @@
-
 version: "3.2"
 services:
   rabbitmq:
@@ -14,13 +13,11 @@ services:
         - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
     networks:
         - rabbitmq_nodejs
-  express-server:
-    container_name: 'express-server'
+  publisher:
+    container_name: 'publisher'
     build:
-      context: ./
-      target: server
-    volumes:
-      - .:/src
+      context: ./publisher
+      target: publisher
     depends_on:
       - "rabbitmq"
     command: sh -c '/bin/wait-for-it.sh rabbitmq:5672 --timeout=90 -- npm start'
@@ -29,6 +26,19 @@ services:
       SERVER_PORT: 8080
     ports:
     - 8080:8080
+    networks:
+      - rabbitmq_nodejs
+  consumer:
+    container_name: 'consumer'
+    build:
+      context: ./consumer
+      target: consumer
+    depends_on:
+      - "rabbitmq"
+      - "publisher"
+    command: sh -c '/bin/wait-for-it.sh rabbitmq:5672 --timeout=90 -- npm start'
+    environment:
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672
     networks:
       - rabbitmq_nodejs
 networks:

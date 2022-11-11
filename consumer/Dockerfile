@@ -1,6 +1,5 @@
-
-FROM node:16-alpine as server
-WORKDIR /src
+FROM node:16-alpine as consumer
+WORKDIR /consumer
 COPY package*.json ./
 
 # Utility script for better container orchestration

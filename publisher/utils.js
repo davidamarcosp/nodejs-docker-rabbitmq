@@ -1,7 +1,5 @@
-const { faker } = require('@faker-js/faker')
-
 function encodeMessage(message) {
-  return Buffer.from(JSON.stringify({ ...message, id: faker.database.mongodbObjectId() }))
+  return Buffer.from(JSON.stringify(message))
 }
 
 function decodeMessage(message) {
