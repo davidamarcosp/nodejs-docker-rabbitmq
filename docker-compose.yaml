@@ -1,0 +1,36 @@
+
+version: "3.2"
+services:
+  rabbitmq:
+    image: rabbitmq:3.8-management-alpine
+    container_name: 'rabbitmq'
+    ports:
+        # AMQP Protocol Port
+        - 5674:5672
+        # RabbitMQ Management UI Port
+        - 15674:15672
+    volumes:
+        - ~/.docker-conf/rabbitmq/data/:/var/lib/rabbitmq/
+        - ~/.docker-conf/rabbitmq/log/:/var/log/rabbitmq
+    networks:
+        - rabbitmq_nodejs
+  express-server:
+    container_name: 'express-server'
+    build:
+      context: ./
+      target: server
+    volumes:
+      - .:/src
+    depends_on:
+      - "rabbitmq"
+    command: sh -c '/bin/wait-for-it.sh rabbitmq:5672 --timeout=90 -- npm start'
+    environment:
+      AMQP_URL: amqp://guest:guest@rabbitmq:5672
+      SERVER_PORT: 8080
+    ports:
+    - 8080:8080
+    networks:
+      - rabbitmq_nodejs
+networks:
+  rabbitmq_nodejs:
+    driver: bridge
